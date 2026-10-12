@@ -233,6 +233,15 @@ class Philter:
     def precompile(self, filepath):
         """ precompiles our regex to speed up pattern matching"""
         regex = open(filepath,"r").read().strip()
+        # Python 3.11+: several pattern files put GLOBAL inline flags such as
+        # (?i) after the start of the expression. Python 3.6-3.10 applied them to the whole pattern with a
+        # DeprecationWarning; 3.11 raises "global flags not at the start of the expression". Hoisting every
+        # global flag group to the front reproduces the old whole-pattern semantics exactly. Scoped groups
+        # like (?i:...) are left alone; they were always legal and only ever applied locally.
+        _flags = re.findall(r"\(\?([aiLmsux]+)\)", regex)
+        if _flags and not regex.startswith("(?" + _flags[0] + ")") or len(_flags) > 1:
+            regex = re.sub(r"\(\?[aiLmsux]+\)", "", regex)
+            regex = "(?" + "".join(sorted(set("".join(_flags)))) + ")" + regex
         re_compiled = None
         with warnings.catch_warnings(): #NOTE: this is not thread safe! but we want to print a more detailed warning message
             warnings.simplefilter(action="error", category=FutureWarning) # in order to print a detailed message
