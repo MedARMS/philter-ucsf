@@ -1,0 +1,11 @@
+# MedAR local override of philter-ucsf's requirements.txt for Python 3.11 on Windows (2026-09-19).
+# Upstream pins numpy==1.22.0 and pandas==1.0.5, which ship no Python 3.11 wheels and would try to
+# compile from source. Everything else keeps the upstream pin. The de-identification path
+# (philter.py, coordinate_map.py) imports only numpy, chardet and nltk; pandas and xmltodict serve
+# the i2b2 dataset tools. No deprecated numpy aliases (np.int/np.float...) are used, so numpy 1.26 is safe.
+# The philter_delta config does not use the Stanford NER tagger, so no Java is required.
+chardet==3.0.4
+nltk==3.6.6
+numpy==1.26.4
+pandas==1.5.3
+xmltodict==0.12.0
